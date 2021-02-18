@@ -1,4 +1,45 @@
-# Sensor Fusion: Lidar Odometry -- 多传感器融合定位与建图: 建图与基于地图的定位
+# homework4
+
+## 1.跑通建图流程，保存地图并显示完整地图
+
+
+
+
+
+## 2.加载点云地图，在原点实现初始化
+### 方式一：SetScanContextPose
+```
+bool MatchingFlow::UpdateMatching() {
+    if (!matching_ptr_->HasInited()) {
+        //
+        // TODO: implement global initialization here
+        //
+        // Hints: You can use SetGNSSPose & SetScanContextPose from matching.hpp
+        //
+        // naive implementation:
+        //Eigen::Matrix4f init_pose = Eigen::Matrix4f::Identity();
+        //matching_ptr_->SetInitPose(init_pose);
+
+        matching_ptr_->SetScanContextPose(current_cloud_data_);
+
+        //matching_ptr_->SetGNSSPose(current_gnss_data_.pose);
+
+                
+        matching_ptr_->SetInited();
+    }
+
+    return matching_ptr_->Update(current_cloud_data_, laser_odometry_);
+}
+```
+
+
+
+## 3.全局初始化
+
+
+
+
+
 
 深蓝学院, 多传感器融合定位与建图, 第4章Mapping and Map Based Localization代码框架.
 
