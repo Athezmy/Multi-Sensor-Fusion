@@ -22,12 +22,16 @@
 #### 计算和初始化位置的偏差并修正
 <img src="img/2.4.png">
 
+
 #### 100s初始化
 <img src="img/2.5-100.png">
+
 ### 200s初始化
-<img src="img/2.6-200.png">
+<img src="img/2.6-200.png"> 
+
 ### 300s初始化
 <img src="img/2.7-300.png">
+
 #### 400s初始化
 <img src="img/2.8-400.png">
 
@@ -36,10 +40,13 @@
 
 #### 100s初始化
 <img src="img/3.4-100.png">
+
 #### 200s初始化
 <img src="img/3.5-200.png">
+
 #### 300s初始化
 <img src="img/3.6-300.png">
+
 #### 400s初始化
 <img src="img/3.7-400.png">
 
