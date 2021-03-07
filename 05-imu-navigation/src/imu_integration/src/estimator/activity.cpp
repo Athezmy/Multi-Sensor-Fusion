@@ -32,6 +32,13 @@ Activity::Activity(void)
     linear_acc_bias_(0.0, 0.0, 0.0)
 {}
 
+void Activity::gt_callback(const nav_msgs::OdometryConstPtr& odom_msg_ptr) {
+
+    odom_curr_.pose.pose.position.x = odom_msg_ptr->pose.pose.position.x;
+    odom_curr_.pose.pose.position.y = odom_msg_ptr->pose.pose.position.y;
+    odom_curr_.pose.pose.position.z = odom_msg_ptr->pose.pose.position.z;
+}
+
 void Activity::Init(void) {
     // parse IMU config:
     private_nh_.param("imu/topic_name", imu_config_.topic_name, std::string("/sim/sensor/imu"));
@@ -68,13 +75,15 @@ void Activity::Init(void) {
 
     odom_ground_truth_sub_ptr = std::make_shared<OdomSubscriber>(private_nh_, odom_config_.topic_name.ground_truth, 1000000);
     odom_estimation_pub_ = private_nh_.advertise<nav_msgs::Odometry>(odom_config_.topic_name.estimation, 500);
+
+    odom_sub_ = private_nh_.subscribe("/pose/ground_truth", 1000, &Activity::gt_callback, this);
+
 }
 
 bool Activity::Run(void) {
     if (!ReadData())
         return false;
 
-    std::cout << "estimator" << std::endl;
     while(HasData()) {
         if (UpdatePose()) {
             PublishPose();
@@ -129,13 +138,18 @@ bool Activity::UpdatePose(void) {
         odom_data_buff_.clear();
         imu_data_buff_.clear();
 
+        ros::Time timestamp = ros::Time::now();
+        initial_time = timestamp.toSec();
+
         // keep the latest IMU measurement for mid-value integration:
         imu_data_buff_.push_back(imu_data);
+
+        odom_data_buff_.push_back(odom_data);
     } else {
         //
         // TODO: implement your estimation here
 
-        /*
+        
         //mid-value
         // get deltas:
         Eigen::Vector3d angular_delta;
@@ -156,8 +170,8 @@ bool Activity::UpdatePose(void) {
         // move forward -- 
         // NOTE: this is NOT fixed. you should update your buffer according to the method of your choice:
         imu_data_buff_.pop_front();
-        */
-
+        
+       /*
         //Euler
         // get deltas:
         Eigen::Vector3d angular_delta;
@@ -178,7 +192,7 @@ bool Activity::UpdatePose(void) {
         // move forward -- 
         // NOTE: this is NOT fixed. you should update your buffer according to the method of your choice:
         imu_data_buff_.pop_front();
-
+        */
 
     }
     
@@ -216,21 +230,24 @@ bool Activity::PublishPose() {
     odom_estimation_pub_.publish(message_odom_);
 
     std::string path;
-    path = getcwd(NULL,0);
-
-    std::cout << path <<std::endl;
-
+    //path = getcwd(NULL,0);
+    path = "/workspace/assignments/05-imu-navigation/src/imu_integration/trajectory";
     
+    std::ofstream odom, ground_truth;
+    odom.open(path + "/odom.txt", std::ios::app);
+    ground_truth.open(path + "/ground_truth.txt", std::ios::app);
 
-    path = "/workspace/assignments/05-imu-navigation";
-    
+    double time_cur = ros::Time::now().toSec() - initial_time;
 
-    std::ofstream outfile;
-    outfile.open(path + "/odom.txt", std::ios::app);
-    outfile << "hello" <<std::endl;
+    odom << time_cur << " " << t.x() << " " << t.y() << " " << t.z() << " " << 0 << " " << 0 << " " << 0 << " " << 1 << std::endl;
+
+    ground_truth << time_cur << " " << odom_curr_.pose.pose.position.x << " " << odom_curr_.pose.pose.position.y << " " << odom_curr_.pose.pose.position.z 
+                 << " " << 0 << " " << 0 << " " << 0 << " " << 1 << std::endl;
+
+    //std::cout << time_cur << " " << t.x() << " " << t.y() << " " << t.z() << " " << 0 << " " << 0 << " " << 0 << " " << 1 << std::endl;
+    //std::cout << odom_curr_.pose.pose.position.x << " " << odom_curr_.pose.pose.position.y << " " << odom_curr_.pose.pose.position.z  << std::endl;
 
     //outfile.close(); 
-
 
     return true;
 }

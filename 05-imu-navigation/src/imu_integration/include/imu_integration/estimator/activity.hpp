@@ -39,6 +39,8 @@ class Activity {
     bool UpdatePose(void);
     bool PublishPose(void);
 
+    void gt_callback(const nav_msgs::OdometryConstPtr& odom_msg_ptr);
+
     // utils:
     /**
      * @brief  get unbiased angular velocity in body frame
@@ -118,7 +120,10 @@ class Activity {
     // subscriber:
     std::shared_ptr<IMUSubscriber> imu_sub_ptr_;
     std::shared_ptr<OdomSubscriber> odom_ground_truth_sub_ptr;
+
     ros::Publisher odom_estimation_pub_;
+
+    ros::Subscriber odom_sub_;
 
     // data buffer:
     std::deque<IMUData> imu_data_buff_;
@@ -126,6 +131,8 @@ class Activity {
 
     // config:
     bool initialized_ = false;
+
+    double initial_time;
 
     IMUConfig imu_config_;
     OdomConfig odom_config_;
@@ -142,6 +149,7 @@ class Activity {
     Eigen::Vector3d vel_ = Eigen::Vector3d::Zero();
 
     nav_msgs::Odometry message_odom_;
+    nav_msgs::Odometry odom_curr_;
 };
 
 } // namespace estimator
