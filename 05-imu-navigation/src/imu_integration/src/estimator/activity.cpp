@@ -25,7 +25,8 @@ Activity::Activity(void)
     : private_nh_("~"), 
     initialized_(false),
     // gravity acceleration:
-    G_(0, 0, -9.81),
+    //G_(0, 0, -9.81),
+    G_(0, 0, -9.79422),
     // angular velocity bias:
     angular_vel_bias_(0.0, 0.0, 0.0),
     // linear acceleration bias:
@@ -47,10 +48,10 @@ void Activity::Init(void) {
     // a. gravity constant:
     private_nh_.param("imu/gravity/x", imu_config_.gravity.x,  0.0);
     private_nh_.param("imu/gravity/y", imu_config_.gravity.y,  0.0);
-    private_nh_.param("imu/gravity/z", imu_config_.gravity.z, -9.81);
+    private_nh_.param("imu/gravity/z", imu_config_.gravity.z, -9.79422);
     G_.x() = imu_config_.gravity.x;
     G_.y() = imu_config_.gravity.y;
-    G_.z() = imu_config_.gravity.z;
+    G_.z() = -9.79422; //imu_config_.gravity.z;
 
     // b. angular velocity bias:
     private_nh_.param("imu/bias/angular_velocity/x", imu_config_.bias.angular_velocity.x,  0.0);
@@ -152,6 +153,7 @@ bool Activity::UpdatePose(void) {
         
         //mid-value
         // get deltas:
+        /*
         Eigen::Vector3d angular_delta;
         GetAngularDelta(1, 0, angular_delta);
        
@@ -170,8 +172,10 @@ bool Activity::UpdatePose(void) {
         // move forward -- 
         // NOTE: this is NOT fixed. you should update your buffer according to the method of your choice:
         imu_data_buff_.pop_front();
+
+        */
         
-       /*
+       
         //Euler
         // get deltas:
         Eigen::Vector3d angular_delta;
@@ -192,7 +196,9 @@ bool Activity::UpdatePose(void) {
         // move forward -- 
         // NOTE: this is NOT fixed. you should update your buffer according to the method of your choice:
         imu_data_buff_.pop_front();
-        */
+
+        
+        
 
     }
     
