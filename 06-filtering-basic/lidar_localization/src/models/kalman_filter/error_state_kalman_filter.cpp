@@ -556,8 +556,18 @@ void ErrorStateKalmanFilter::SetProcessEquation(const Eigen::Matrix3d &C_nb,
   // b. set process equation for delta ori:
   F_.block<3, 3>(INDEX_ERROR_ORI, INDEX_ERROR_ORI) =
       -Sophus::SO3d::hat(w_b).matrix();
+
+  F_.block<3, 3>(INDEX_ERROR_ORI, INDEX_ERROR_GYRO) =
+    -Eigen::Matrix<double, 3, 3>::Identity();             //fix-zy
+
+  F_.block<3, 3>(INDEX_ERROR_POS, INDEX_ERROR_VEL) =
+    Eigen::Matrix<double, 3, 3>::Identity();             //fix-zy
+
+
+
   B_.block<3, 3>(INDEX_ERROR_VEL, 0) = C_nb;
-  B_.block<9, 9>(INDEX_ERROR_ORI, INDEX_ERROR_VEL).setIdentity();
+  //B_.block<9, 9>(INDEX_ERROR_ORI, INDEX_ERROR_VEL).setIdentity();
+  B_.block<3, 3>(INDEX_ERROR_ORI, INDEX_ERROR_VEL).setIdentity();
 }
 
 /**
@@ -596,14 +606,21 @@ void ErrorStateKalmanFilter::UpdateErrorEstimation(
   F_2nd = 0.5 * T * F_ * F_1st;
   // approximate to 2nd order:
   MatrixF F = MatrixF::Identity() + F_1st + F_2nd;
-  MatrixB B = T * B_;
-  B.block<6, 6>(6, 6) = Eigen::Matrix<double, 6, 6>::Identity() * sqrt(T);
+  //MatrixB B = T * B_;
+  //B.block<6, 6>(6, 6) = Eigen::Matrix<double, 6, 6>::Identity() * sqrt(T);   fix-zy
+
+  MatrixB B = B_;
+  B.block<6, 6>(3, 0) = B.block<6, 6>(3, 0) * T;
+  //B.block<6, 6>(9, 6) = Eigen::Matrix<double, 6, 6>::Identity() * sqrt(T);
 
   //
   // TODO: perform Kalman prediction
   //
-  X_ = X_;                                          // fix this
-  P_ = P_ ; // fix this
+  //X_ = X_;                                          // fix this
+  //P_ = P_ ; // fix this
+  X_ = F * X_;
+  P_ = F*P_*F.transpose() + B*Q_*B.transpose();
+
 }
 
 /**
@@ -617,8 +634,13 @@ void ErrorStateKalmanFilter::CorrectErrorEstimationPose(
   //
   // TODO: set measurement:
   //
-  Eigen::Vector3d P_nn_obs = Eigen::Vector3d::Zero(); // fix this
-  Eigen::Vector3d R_nn_obs = Eigen::Matrix3d::Identity(); // fix this
+  //Eigen::Vector3d P_nn_obs = Eigen::Vector3d::Zero(); // fix this
+  //Eigen::Vector3d R_nn_obs = Eigen::Matrix3d::Identity(); // fix this
+
+  Eigen::Vector3d P_nn_obs =   pose_.block<3,1>(0,3) - T_nb.block<3,1>(0,3);
+
+  Eigen::Matrix3d Rnn = T_nb.block<3,3>(0,0).transpose() * pose_.block<3,3>(0,0);
+  Eigen::Vector3d R_nn_obs = Sophus::SO3d::vee(Rnn - Eigen::Matrix3d::Identity());
 
   YPose_.block<3, 1>(0, 0) = P_nn_obs;
   YPose_.block<3, 1>(3, 0) = R_nn_obs;
@@ -631,8 +653,11 @@ void ErrorStateKalmanFilter::CorrectErrorEstimationPose(
   //
   // TODO: set Kalman gain:
   //
-  MatrixRPose R = RPose_; // fix this
-  K = K;                  // fix this
+  //MatrixRPose R = RPose_; // fix this
+  //K = K;                  // fix this
+  MatrixRPose R = GPose_*P_*GPose_.transpose() + RPose_;
+  K = P_*GPose_.transpose()*R.inverse();
+
 
 }
 
@@ -661,8 +686,11 @@ void ErrorStateKalmanFilter::CorrectErrorEstimation(
   // TODO: perform Kalman correct:
   //
 
-  P_ = P_; // fix this
-  X_ = X_;              // fix this
+  //P_ = P_; // fix this
+  //X_ = X_;              // fix this
+  P_ = (MatrixP::Identity() - K*GPose_)*P_;
+  X_ = X_ + K*(YPose_ - GPose_*X_);
+
 }
 
 /**
@@ -675,23 +703,31 @@ void ErrorStateKalmanFilter::EliminateError(void) {
   // TODO: correct state estimation using the state of ESKF
   //
   // a. position:
-  pose_.block<3, 1>(0, 3) =
-          pose_.block<3, 1>(0, 3); // fix this
+  //pose_.block<3, 1>(0, 3) =
+  //        pose_.block<3, 1>(0, 3); // fix this
+  pose_.block<3, 1>(0, 3) -=
+            X_.block<3, 1>(INDEX_ERROR_POS, 0);
+    
   // b. velocity:
-  vel_ = vel_; // fix this
+  //vel_ = vel_; // fix this
+  vel_ -= X_.block<3, 1>(INDEX_ERROR_VEL, 0);
+
   // c. orientation:
   Eigen::Matrix3d C_nn =
-      Sophus::SO3d::exp(X_.block<3, 1>(INDEX_ERROR_ORI, 0)).matrix();
-  pose_.block<3, 3>(0, 0) = pose_.block<3, 3>(0, 0); // fix this
+      Sophus::SO3d::hat(X_.block<3, 1>(INDEX_ERROR_ORI, 0)).matrix();
+  //pose_.block<3, 3>(0, 0) = pose_.block<3, 3>(0, 0); // fix this
+  pose_.block<3, 3>(0, 0) =pose_.block<3, 3>(0, 0) * (Eigen::Matrix3d::Identity() - C_nn);
 
   // d. gyro bias:
   if (IsCovStable(INDEX_ERROR_GYRO)) {
-    gyro_bias_ += X_.block<3, 1>(INDEX_ERROR_GYRO, 0);
+    //gyro_bias_ += X_.block<3, 1>(INDEX_ERROR_GYRO, 0);
+    gyro_bias_ -= X_.block<3, 1>(INDEX_ERROR_GYRO, 0);
   }
 
   // e. accel bias:
   if (IsCovStable(INDEX_ERROR_ACCEL)) {
-    accl_bias_ += X_.block<3, 1>(INDEX_ERROR_ACCEL, 0);
+    //accl_bias_ += X_.block<3, 1>(INDEX_ERROR_ACCEL, 0);
+    accl_bias_ -= X_.block<3, 1>(INDEX_ERROR_ACCEL, 0);
   }
 }
 

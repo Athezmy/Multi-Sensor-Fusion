@@ -57,11 +57,11 @@ error_state_kalman_filter:
         latitude:   31.224361
     covariance:
         prior:
-            pos: 2.5e-1
-            vel: 2.5e-3
-            ori: 1.0e-6
-            epsilon: 1.0e-8
-            delta: 1.0e-8
+            pos: 1.0       #2.5e-1
+            vel: 2.5e-2    #2.5e-3
+            ori: 1.0e-5    #1.0e-6
+            epsilon: 1.0e-7 # 1.0e-8
+            delta: 1.0e-7   # 1.0e-8
         process:
             gyro: 1.0e-8
             accel: 1.0e-8
