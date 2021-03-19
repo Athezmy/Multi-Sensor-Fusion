@@ -14,3 +14,38 @@
 
 <img src="images/1.7.png"> 
 
+## 2.调试参数，使得滤波后性能更好
+
+初始参数evo评测结果如下：
+
+<img src="images/2.11.png"> 
+<img src="images/2.12.png"> 
+<img src="images/2.13.png">
+
+分别增大和减小先验噪声P
+
+<img src="images/2.21.png"> 
+<img src="images/2.22.png"> 
+<img src="images/2.23.png">
+
+<img src="images/2.31.png"> 
+<img src="images/2.32.png"> 
+<img src="images/2.33.png">
+
+增大过程噪声Q，减小测量噪声R
+
+<img src="images/2.41.png"> 
+<img src="images/2.42.png"> 
+<img src="images/2.43.png">
+
+减小过程噪声Q，增大测量噪声R
+
+<img src="images/2.51.png"> 
+<img src="images/2.52.png"> 
+<img src="images/2.53.png">
+
+分析发现：  
+P 是误差协方差初始值，表示对当前预测状态的信任程度，  
+Q越大越信任观测值  
+R越大越信任预测值
+
