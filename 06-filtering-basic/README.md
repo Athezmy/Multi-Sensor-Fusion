@@ -61,7 +61,7 @@ R越大越信任预测值
 
 主要是B矩阵形式不同
 
-<img src="images/3.3.jpg">
+<img src="images/3.4.jpg">
 <img src="images/3.1.png"> 
 <img src="images/3.2.png"> 
 
