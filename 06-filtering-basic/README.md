@@ -55,6 +55,43 @@ R越大越信任预测值
 <img src="images/2.63.png"> 
 <img src="images/2.62.png">
 
-融合后evo评测ape的结果中 max、mean、min都是融合后更优，其他参数也更为接近
+融合后evo评测ape的结果中 max、mean、median、min都是融合后更优，其他参数也更为接近
+
+## 3.不考虑随机游走推导模型并实现，对比性能差异并给出对比结果
+
+主要是B矩阵形式不同
+
+<img src="images/3.3.jpg">
+<img src="images/3.1.png"> 
+<img src="images/3.2.png"> 
+
+设置了与2中相同的6组参数：
+
+<img src="images/4.11.png"> 
+<img src="images/4.12.png"> 
+<img src="images/4.13.png">
+
+<img src="images/4.21.png"> 
+<img src="images/4.22.png"> 
+<img src="images/4.23.png">
+
+<img src="images/4.31.png"> 
+<img src="images/4.32.png"> 
+<img src="images/4.33.png">
+
+<img src="images/4.41.png"> 
+<img src="images/4.42.png"> 
+<img src="images/4.43.png">
+
+<img src="images/4.51.png"> 
+<img src="images/4.52.png"> 
+<img src="images/4.53.png">
+
+<img src="images/4.61.png"> 
+<img src="images/4.62.png"> 
+<img src="images/4.63.png">
+
+
+
 
 
