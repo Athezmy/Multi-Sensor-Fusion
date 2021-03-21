@@ -61,7 +61,7 @@ R越大越信任预测值
 
 主要是B矩阵形式不同
 
-<img src="images/3.3.jpg">
+<img src="images/3.4.jpg">
 <img src="images/3.1.png"> 
 <img src="images/3.2.png"> 
 
@@ -90,6 +90,9 @@ R越大越信任预测值
 <img src="images/4.61.png"> 
 <img src="images/4.62.png"> 
 <img src="images/4.63.png">
+
+由于程序每次运行轨迹与真值都有一个较小的随机偏差，很难从数值上对比同一组参数在是否考虑随机游走情况下大小差异，测得的大部分参数下，不考虑随机游走结果中max、min都是融合后结果更好。  
+kalman以白噪声为假设前提，零偏稳定性是白噪声，随机游走不是，适当调节参数可以起到一定效果，但结果不如只处理白噪声时理想。
 
 
 
