@@ -1,7 +1,0 @@
-.catkin_tools
-build
-devel
-install
-logs
-.catkin_workspace
-.vscode/
