@@ -14,7 +14,7 @@ imu预积分状态更新如下：
 
 <img src="imgs/1.3.png"> 
 
-g20里计算误差：
+g2o计算误差：
 
 <img src="imgs/1.4.png">
 
